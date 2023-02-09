@@ -1,0 +1,129 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <ctime>
+#include <cmath>
+#pragma warning(disable:4996)
+
+using namespace std;
+
+struct Car {
+    string make;
+    string model;
+    int year;
+    double rentalRate;
+    bool available;
+};
+
+vector<Car> cars = {
+  {"Toyota", "Camry", 2020, 50.0, true},
+  {"Honda", "Civic", 2019, 40.0, true},
+  {"Ford", "Mustang", 2018, 60.0, true}
+};
+
+struct Rental {
+    string customer;
+    string make;
+    string model;
+    int year;
+    double rentalRate;
+    int rentalPeriod;
+    double rentalFee;
+    time_t rentalDate;
+};
+
+vector<Rental> rentals;
+
+void displayCars() {
+    cout << "AVAILABLE CARS:" << endl;
+    for (int i = 0; i < cars.size(); i++) {
+        if (cars[i].available) {
+            cout << i + 1 << ". " << cars[i].year << " " << cars[i].make << " " << cars[i].model << endl;
+        }
+    }
+}
+
+int selectCar() {
+    int carIndex;
+    displayCars();
+    cout << endl << "SELECT CAR (Enter number): ";
+    cin >> carIndex;
+    carIndex--;
+    if (!cars[carIndex].available) {
+        cout << "CAR NOT AVAILABLE. SELECT ANOTHER." << endl;
+        return selectCar();
+    }
+    return carIndex;
+}
+
+int getRentalPeriod() {
+    int rentalPeriod;
+    cout << "ENTER RENTAL PERIOD (DAYS): ";
+    cin >> rentalPeriod;
+    return rentalPeriod;
+}
+double calculateRentalFee(double rentalRate, int rentalPeriod) {
+    return rentalRate * rentalPeriod;
+}
+
+void rentCar() {
+    int carIndex = selectCar();
+    int rentalPeriod = getRentalPeriod();
+    double rentalFee = calculateRentalFee(cars[carIndex].rentalRate, rentalPeriod);
+
+    Rental rental = {
+      "Jeff Mangilin Catibog",
+      cars[carIndex].make,
+      cars[carIndex].model,
+      cars[carIndex].year,
+      cars[carIndex].rentalRate,
+      rentalPeriod,
+      rentalFee,
+      time(0)
+    };
+    rentals.push_back(rental);
+    cars[carIndex].available = false;
+
+    cout << endl << "RENTAL CONFIRMED:" << endl;
+    cout << "CUSTOMER: " << rental.customer << endl;
+    cout << "CAR: " << rental.year << " " << rental.make << " " << rental.model << endl;
+    cout << "RENTAL FEE: $" << rental.rentalFee << endl;
+    cout << "RENTAL PERIOD: " << rental.rentalPeriod << " " << rental.year << endl;
+    cout << "RENTAL DATE: " << ctime(&rental.rentalDate);
+}
+
+void returnCar() {
+    int carIndex = selectCar();
+    for (int i = 0; i < rentals.size(); i++) {
+        if (!cars[carIndex].available && rentals[i].make == cars[carIndex].make && rentals[i].model == cars[carIndex].model) {
+            cout << endl << "RETURN CONFIRMED:" << endl;
+            cout << "CUSTOMER: " << rentals[i].customer << endl;
+            cout << "CAR: " << rentals[i].year << " " << rentals[i].make << " " << rentals[i].model << endl;
+            cout << "RENTAL FEE: $" << rentals[i].rentalFee << endl;
+            cout << "RENTAL PERIOD: " << rentals[i].rentalPeriod << " days" << endl;
+            cout << "RENTAL DATE: " << ctime(&rentals[i].rentalDate);
+            cars[carIndex].available = true;
+            break;
+        }
+    }
+}
+
+int main() {
+    int choice;
+    do {
+        cout << endl << "CAR RENTAL SYSTEM" << endl;
+        cout << "1. Rent a car" << endl;
+        cout << "2. Return a car" << endl;
+        cout << "3. Exit" << endl;
+        cout << "Enter choice: ";
+        cin >> choice;
+
+        switch (choice) {
+        case 1: rentCar(); break;
+        case 2: returnCar(); break;
+        case 3: break;
+        default: cout << "INVALID CHOICE. TRY AGAIN." << endl;
+        }
+    } while (choice != 3);
+    return 0;
+}
